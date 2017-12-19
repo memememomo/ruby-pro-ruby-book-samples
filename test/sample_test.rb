@@ -106,6 +106,60 @@ class SampleTest < MiniTest::Test
     assert_equal 8, 2 ** 3
   end
 
+  def test_演算子の優先順位
+    assert_equal 23, 2 * 3 + 4 * 5 - 6 / 2
+    assert_equal -7, 2 * (3 + 4) * (5 - 6) / 2
+  end
+
+  def test_変数に格納された数値の増減
+    n = 1
+
+    n += 1
+    assert_equal 2, n
+
+    n -= 1
+    assert_equal 1, n
+
+    n = 2
+
+    n *= 3
+    assert_equal 6, n
+
+    n /= 2
+    assert_equal 3, n
+
+    n **= 2
+    assert_equal 9, n
+  end
+
+  def test_数値と文字列は暗黙的に変換されない
+    e = assert_raises TypeError do
+      1 + '10'
+    end
+    assert_equal 'String can\'t be coerced into Fixnum', e.message
+
+    assert_equal 11, 1 + '10'.to_i
+    assert_equal 11.5, 1 + '10.5'.to_f
+
+    number = 3
+    e = assert_raises TypeError do
+      'Number is ' + number
+    end
+    assert_equal 'no implicit conversion of Fixnum into String', e.message
+
+    assert_equal 'Number is 3', 'Number is ' + number.to_s
+    assert_equal 'Number is 3', "Number is #{number}"
+  end
+
+  def test_小数を使う場合は丸め誤差に注意
+    assert_equal false, 0.1 * 3.0 == 0.3
+    assert_equal false, 0.1 * 3.0 <= 0.3
+
+    # Rationalクラスであれば期待した通りに値の比較ができる
+    assert_equal true, 0.1r * 3r == 0.3
+    assert_equal true, 0.1r * 3r <= 0.3
+  end
+
   def test_リテラル
     # ソースコードに直接埋め込むことができる値のことをリテラルという
     assert_equal Fixnum, 123.class
@@ -114,9 +168,6 @@ class SampleTest < MiniTest::Test
     assert_equal Hash, {'japan' => 'yen', 'us' => 'dollar', 'india' => 'ruppe'}.class
     assert_equal Regexp, /\d+-\d+/.class
   end
-
-
-
 
   def test_sample
     assert_equal 'RUBY', 'ruby'.upcase
